@@ -17,7 +17,9 @@ TODO: work out where these modules are packaged in Debian/Ubuntu
 
 Usage:
 
+```
 perl passwordinator.pl
+```
 
 No arguments are currently supported.
 
