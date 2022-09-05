@@ -3,7 +3,7 @@
 # 
 # Create a range of different strength passwords suitable for a range of applications
 #
-# Simon Chapman Sept '22
+# @Dionysus Sept '22
 #
 
 use strict;
