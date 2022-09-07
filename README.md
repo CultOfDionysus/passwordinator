@@ -25,5 +25,5 @@ No arguments are currently supported.
 
 Example results:
 
+![passwordinator screenshot](https://user-images.githubusercontent.com/108018363/188919920-cbaead25-7534-4c6f-9a71-bcb80da52e4f.png)
 
-![passwordinator screenshot](https://user-images.githubusercontent.com/108018363/188439477-8515303f-a3d8-4f41-a114-bbba30fdcbe1.png)
