@@ -3,7 +3,7 @@
 # 
 # Create a range of different strength passwords suitable for a range of applications
 #
-# @Dionysus Sept '22
+# https://github.com/CultOfDionysus/passwordinator
 #
 
 use strict;
@@ -17,44 +17,38 @@ use JSON;
 my $version = '1.0';
 
 my $banner = << 'END_BANNER';
-     |    .oPYo.                                                  8  o                o                 |
-     |    8    8                                                  8                   8                 |
-     |   o8YooP' .oPYo. .oPYo. .oPYo. o   o   o .oPYo. oPYo. .oPYo8 o8 odYo. .oPYo.  o8P .oPYo. oPYo.   |
-     |    8      .oooo8 Yb..   Yb..   Y. .P. .P 8    8 8  `' 8    8  8 8' `8 .oooo8   8  8    8 8  `'   |
-     |    8      8    8   'Yb.   'Yb. `b.d'b.d' 8    8 8     8    8  8 8   8 8    8   8  8    8 8       |
-     |    8      `YooP8 `YooP' `YooP'  `Y' `Y'  `YooP' 8     `YooP'  8 8   8 `YooP8   8  `YooP' 8       |
+          .oPYo.                                                  8  o                o                  
+          8    8                                                  8                   8                  
+         o8YooP' .oPYo. .oPYo. .oPYo. o   o   o .oPYo. oPYo. .oPYo8 o8 odYo. .oPYo.  o8P .oPYo. oPYo.    
+          8      .oooo8 Yb..   Yb..   Y. .P. .P 8    8 8  `' 8    8  8 8' `8 .oooo8   8  8    8 8  `'    
+          8      8    8   'Yb.   'Yb. `b.d'b.d' 8    8 8     8    8  8 8   8 8    8   8  8    8 8        
+          8      `YooP8 `YooP' `YooP'  `Y' `Y'  `YooP' 8     `YooP'  8 8   8 `YooP8   8  `YooP' 8        
 END_BANNER
 
 my @pcolours = ("bright_red", "bright_white", "bright_blue");
 my $pqcomplex = &mkpasswd(1,12);
 my $pbcomplex = &mkpasswd(2,8);
 my $pnotcomplex = &mkpasswd(3,8);
-my $pvcomplex = &mkpasswd(1,20);
+my $pvcomplex = &mkpasswd(1,32);
 
 my $user_agent = LWP::UserAgent::JSON->new;
 my $request    = HTTP::Request::JSON->new(GET =>'https://random-word-api.herokuapp.com/word?number=3&length=6');
 my $response   = $user_agent->request($request);
 my $words      = from_json($response->content);
 
-print colored(['blue on_black'],"     +-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+\n");
-print colored(['bright_blue on_black'],$banner);
-print colored(['blue on_black'],"     +-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+\n\n");
+print colored(['bright_blue on_black'],"$banner\n\n");
 print colored(['green on_black'], "     Very Complex-> ");
-print colored(['bright_green on_black'],$pvcomplex), colored(['cyan on_black'], "\t<- 20 chars, mixed case, numbers, specials");
+print colored(['bright_green on_black'],$pvcomplex), colored(['cyan on_black'], "\t<- 32 chars, mixed case, numbers, specials");
 print "\n\n";
-print colored(['blue on_black'],"+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+\n\n");
 print colored(['green on_black'], "    Quite Complex-> ");
-print colored(['bright_cyan on_black'],$pqcomplex), colored(['cyan on_black'], "\t\t<- 12 chars, mixed case, numbers, specials");
+print colored(['bright_cyan on_black'],$pqcomplex), colored(['cyan on_black'], "\t\t\t<- 12 chars, mixed case, numbers, specials");
 print "\n\n";
-print colored(['blue on_black'],"+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+\n\n");
 print colored(['green on_black'], "    A Bit Complex-> ");
-print colored(['bright_yellow on_black'],$pbcomplex), colored(['cyan on_black'], "\t\t\t<- 8 chars, mixed case, numbers, no visually-similar chars");
+print colored(['bright_yellow on_black'],$pbcomplex), colored(['cyan on_black'], "\t\t\t\t<- 8 chars, mixed case, numbers, no visually-similar chars");
 print "\n\n";
-print colored(['blue on_black'],"+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+\n\n");
 print colored(['green on_black'], "      Not Complex-> ");
-print colored(['red on_black'],$pnotcomplex), colored(['cyan on_black'], "\t\t\t<- 8 chars, lower case only, numbers, no visually-similar chars");
+print colored(['red on_black'],$pnotcomplex), colored(['cyan on_black'], "\t\t\t\t<- 8 chars, lower case only, numbers, no visually-similar chars");
 print "\n\n";
-print colored(['blue on_black'],"+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+\n\n");
 print colored(['green on_black'], " 3 Words Password-> ");
 
 my $i=0;
@@ -62,11 +56,10 @@ foreach my $word (@$words) {
 	print colored(["$pcolours[$i] on_black"], ucfirst $word);
 	$i++;
 }
-print "\t\t";
+print "\t\t\t";
 print colored(['cyan on_black'], "<- 3 random words via random-word-api.herokuapp.com API");
 print "\n\n";
 
-print colored(['blue on_black'],"+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+\n\n");
 print colored(['green on_black'], " 3 W0rd5 P4ssword-> ");
 
 $i=0;
@@ -74,7 +67,7 @@ foreach my $word (@$words) {
 	print colored(["$pcolours[$i] on_black"], ucfirst &leetist($word));
 	$i++;
 }
-print "\t\t";
+print "\t\t\t";
 print colored(['cyan on_black'], "<- 3 random words with a 2/1 chance of being Hax0rified");
 print "\n\n";
 
