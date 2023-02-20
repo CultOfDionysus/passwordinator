@@ -1,5 +1,5 @@
 # Passwordinator
-Perl script to suggest a range of varying strengh passwords.
+Perl script to suggest a range of varying strength passwords.
 
 Simple script to randomly generate passwords. Yes, there are loads of these out there but this one has ANSI screen colours to make it look cool, IMO.
 
