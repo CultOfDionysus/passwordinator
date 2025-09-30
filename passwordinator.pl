@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-
 # 
 # Create a range of different strength passwords suitable for a range of applications
 #
@@ -32,7 +31,8 @@ my $pnotcomplex = &mkpasswd(3,8);
 my $pvcomplex = &mkpasswd(1,32);
 
 my $user_agent = LWP::UserAgent::JSON->new;
-my $request    = HTTP::Request::JSON->new(GET =>'https://random-word-api.herokuapp.com/word?number=3&length=6');
+#my $request    = HTTP::Request::JSON->new(GET =>'https://random-word-api.herokuapp.com/word?number=3&length=6');
+my $request    = HTTP::Request::JSON->new(GET =>'https://random-word.ryanrk.com/api/en/word/random/3');
 my $response   = $user_agent->request($request);
 my $words      = from_json($response->content);
 
@@ -56,8 +56,8 @@ foreach my $word (@$words) {
 	print colored(["$pcolours[$i] on_black"], ucfirst $word);
 	$i++;
 }
-print "\t\t\t";
-print colored(['cyan on_black'], "<- 3 random words via random-word-api.herokuapp.com API");
+print "\t\t";
+print colored(['cyan on_black'], "<- 3 random words via https://random-word.ryanrk.com API");
 print "\n\n";
 
 print colored(['green on_black'], " 3 W0rd5 P4ssword-> ");
@@ -67,7 +67,7 @@ foreach my $word (@$words) {
 	print colored(["$pcolours[$i] on_black"], ucfirst &leetist($word));
 	$i++;
 }
-print "\t\t\t";
+print "\t\t";
 print colored(['cyan on_black'], "<- 3 random words with a 2/1 chance of being Hax0rified");
 print "\n\n";
 
