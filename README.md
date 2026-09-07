@@ -1,29 +1,40 @@
 # Passwordinator
-Perl script to suggest a range of varying strength passwords.
 
-Simple script to randomly generate passwords. Yes, there are loads of these out there but this one has ANSI screen colours to make it look cool, IMO.
+A Perl script that generates several character-password options and two word-password variants, with ANSI colours in interactive terminals.
 
-There are some module dependencies:
+## Installation
 
-* Crypt::Random
-* Term::ANSIColor
-* LWP::UserAgent::JSON
-* HTTP::Request::JSON
-* JSON
+Requires Perl 5.14 or later and `Crypt::Random`:
 
-So you'll need to install these according to your perl distribution. I use the CPAN module.
-
-TODO: work out where these modules are packaged in Debian/Ubuntu
-
-Usage:
-
+```sh
+cpan Crypt::Random
 ```
+
+`Term::ANSIColor`, `Getopt::Long`, `HTTP::Tiny`, and `JSON::PP` are included with supported Perl versions. Online word generation also requires HTTPS support for `HTTP::Tiny` (typically `IO::Socket::SSL` and `Net::SSLeay`) and a working CA certificate store. If HTTPS or the service is unavailable, character passwords still work.
+
+## Usage
+
+```sh
 perl passwordinator.pl
+perl passwordinator.pl --offline
+perl passwordinator.pl --no-color
+perl passwordinator.pl --help
+perl passwordinator.pl --version
 ```
 
-No arguments are currently supported.
+- `--offline` generates character passwords without contacting any service.
+- `--no-color` (also `--no-colour`) disables colours. Colours are automatically disabled when output is redirected or piped, or `NO_COLOR` is set.
+- Unknown options and unexpected positional arguments return a nonzero exit status.
 
-Example results:
+The default output includes 32- and 12-character passwords drawn from mixed-case letters, digits and symbols, plus two 8-character options with restricted alphabets. Character types are sampled independently: every category is not guaranteed to appear. Prefer longer passwords; the shorter options are for systems with restrictive requirements.
 
-![passwordinator screenshot](https://user-images.githubusercontent.com/108018363/188919920-cbaead25-7534-4c6f-9a71-bcb80da52e4f.png)
+Online mode requests three words from `https://random-word.ryanrk.com/api/en/word/random/3`. Requests use TLS verification and a five-second socket timeout. Failed requests or malformed word lists produce a warning on stderr while preserving the character passwords. The API provider knows the words it supplies; word variants are suggestions, not locally generated secret passphrases. Letter substitutions do not provide independent randomness for each character.
 
+## Tests
+
+```sh
+perl -c passwordinator.pl
+prove -v t
+```
+
+The CLI tests use deterministic random and HTTP doubles to exercise formatting, offline operation, validation, and service failures without network access. They do not test the entropy source or live API connectivity.

@@ -7,13 +7,30 @@
 
 use strict;
 use warnings;
-use Crypt::Random qw( makerandom_itv );
+use Getopt::Long qw(GetOptions);
 use Term::ANSIColor;
-use LWP::UserAgent::JSON;
-use HTTP::Request::JSON;
-use JSON;
+use HTTP::Tiny;
+use JSON::PP qw(decode_json);
 
-my $version = '1.0';
+my $version = '1.1';
+my ($offline, $no_colour, $help, $show_version);
+GetOptions(
+    'offline' => \$offline,
+    'no-color|no-colour' => \$no_colour,
+    'help|h' => \$help,
+    'version' => \$show_version,
+) or die "Try --help for usage.\n";
+die "Unexpected arguments: @ARGV\n" if @ARGV;
+if ($help) {
+    print "Usage: perl passwordinator.pl [--offline] [--no-color] [--version] [--help]\n";
+    print "  --offline   Generate character passwords without contacting the word API.\n";
+    print "  --no-color  Disable ANSI colours (also disabled when piping or with NO_COLOR).\n";
+    exit 0;
+}
+if ($show_version) { print "Passwordinator $version\n"; exit 0; }
+$ENV{ANSI_COLORS_DISABLED} = 1 if $no_colour || exists $ENV{NO_COLOR} || !-t STDOUT;
+require Crypt::Random;
+Crypt::Random->import(qw(makerandom_itv));
 
 my $banner = << 'END_BANNER';
           .oPYo.                                                  8  o                o                  
@@ -30,11 +47,20 @@ my $pbcomplex = &mkpasswd(2,8);
 my $pnotcomplex = &mkpasswd(3,8);
 my $pvcomplex = &mkpasswd(1,32);
 
-my $user_agent = LWP::UserAgent::JSON->new;
-#my $request    = HTTP::Request::JSON->new(GET =>'https://random-word-api.herokuapp.com/word?number=3&length=6');
-my $request    = HTTP::Request::JSON->new(GET =>'https://random-word.ryanrk.com/api/en/word/random/3');
-my $response   = $user_agent->request($request);
-my $words      = from_json($response->content);
+my $words;
+unless ($offline) {
+    eval {
+        my $response = HTTP::Tiny->new(timeout => 5, verify_SSL => 1)->get(
+            'https://random-word.ryanrk.com/api/en/word/random/3');
+        die "Word API request failed (HTTP $response->{status}).\n" unless $response->{success};
+        my $decoded = decode_json($response->{content});
+        die "Word API returned an invalid word list.\n"
+            unless ref($decoded) eq 'ARRAY' && @$decoded == 3
+                && !grep { !defined($_) || ref($_) || !/\A[a-zA-Z]{1,64}\z/ } @$decoded;
+        $words = $decoded;
+        1;
+    } or warn "Word passwords unavailable; character passwords are still available.\n";
+}
 
 print colored(['bright_blue on_black'],"$banner\n\n");
 print colored(['green on_black'], "     Very Complex-> ");
@@ -49,27 +75,30 @@ print "\n\n";
 print colored(['green on_black'], "      Not Complex-> ");
 print colored(['red on_black'],$pnotcomplex), colored(['cyan on_black'], "\t\t\t\t<- 8 chars, lower case only, numbers, no visually-similar chars");
 print "\n\n";
-print colored(['green on_black'], " 3 Words Password-> ");
+if ($words) {
+    print colored(['green on_black'], " 3 Words Password-> ");
 
-my $i=0;
-foreach my $word (@$words) {
-	print colored(["$pcolours[$i] on_black"], ucfirst $word);
-	$i++;
+    my $i=0;
+    foreach my $word (@$words) {
+    	print colored(["$pcolours[$i] on_black"], ucfirst $word);
+    	$i++;
+    }
+    print "\t\t";
+    print colored(['cyan on_black'], "<- 3 random words via https://random-word.ryanrk.com API");
+    print "\n\n";
+
+    print colored(['green on_black'], " 3 W0rd5 P4ssword-> ");
+
+    $i=0;
+    foreach my $word (@$words) {
+    	print colored(["$pcolours[$i] on_black"], ucfirst &leetist($word));
+    	$i++;
+    }
+    print "\t\t";
+    print colored(['cyan on_black'], "<- 3 random words with a 2-in-3 chance of being Hax0rified");
+    print "\n\n";
+
 }
-print "\t\t";
-print colored(['cyan on_black'], "<- 3 random words via https://random-word.ryanrk.com API");
-print "\n\n";
-
-print colored(['green on_black'], " 3 W0rd5 P4ssword-> ");
-
-$i=0;
-foreach my $word (@$words) {
-	print colored(["$pcolours[$i] on_black"], ucfirst &leetist($word));
-	$i++;
-}
-print "\t\t";
-print colored(['cyan on_black'], "<- 3 random words with a 2/1 chance of being Hax0rified");
-print "\n\n";
 
 exit 0;
 
@@ -77,10 +106,10 @@ exit 0;
 sub mkpasswd {
 
 	my $range;
-	my $pass;
+	my $pass = '';
 
 	if ($_[0] == 1) { # Type 1 - all chars upper/lower/special
-		$range = '/%?<>[]{}+!$%^&*()-=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+		$range = '/%?<>[]{}+!$^&*()-=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 	}
  	else { 
 		if ($_[0] == 2) { #  Type 2 - num/char upper/lower, visually similar chars removed
@@ -103,17 +132,17 @@ sub mkpasswd {
 
 sub leetist { 
    my $temp = $_[0];
-   my $num = makerandom_itv(Lower => 0, Upper => 3, Strength => 0); #2/1 chance of conversion
+   my $num = makerandom_itv(Lower => 0, Upper => 3, Strength => 0); #2-in-3 chance of conversion
    return $temp if ($num == 0);
-   $temp =~ s/[i,I]/!/;
-   $temp =~ s/[t,T]/7/;
-   $temp =~ s/[e,E]/3/;
-   $temp =~ s/[S,s]/5/;
-   $temp =~ s/[l,L]/1/;
-   $temp =~ s/[B,b]/8/;
-   $temp =~ s/[Z,z]/2/;
-   $temp =~ s/[A,a]/4/;
-   $temp =~ s/[G,g]/9/;
-   $temp =~ s/[O,o]/0/;
+   $temp =~ s/[iI]/!/;
+   $temp =~ s/[tT]/7/;
+   $temp =~ s/[eE]/3/;
+   $temp =~ s/[Ss]/5/;
+   $temp =~ s/[lL]/1/;
+   $temp =~ s/[Bb]/8/;
+   $temp =~ s/[Zz]/2/;
+   $temp =~ s/[Aa]/4/;
+   $temp =~ s/[Gg]/9/;
+   $temp =~ s/[Oo]/0/;
    return $temp;
 }
